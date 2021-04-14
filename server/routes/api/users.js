@@ -18,14 +18,25 @@ router.route('/register')
                 password: request.body.password
             });
 
+            // generate token
+            const token = user.generateToken();
+
             // hash password on pre-save action
             const doc = await user.save();
 
-            response.cookie('x-access-token', 'token-value')
-                .status(200).send(doc);
+            // TODO: send email
+
+            response.cookie('x-access-token', token)
+                .status(200).send( getUserProps(doc) );
         } catch (error) {
             response.status(400).json({message: 'Auth error', error});
         }
     });
+
+const getUserProps = user => ({
+   _id: user._id,
+   email: user.email,
+   role: user.role
+});
 
 module.exports = router;

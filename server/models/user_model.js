@@ -60,6 +60,14 @@ userSchem.pre('save', async function (next) {
     next();
 });
 
+// generate token
+userSchem.methods.generateToken = function () {
+    const user = this;
+    const userObj = { _id: user._id.toHexString(), email: user.email };
+    const token = jwt.sign(userObj, process.env.DB_SECRET, {expiresIn: '1d'});
+    return token;
+}
+
 // check for email to be unique in db
 userSchem.statics.emailExist = async function (email) {
     const user = await this.findOne({email});
