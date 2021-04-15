@@ -39,4 +39,32 @@ const getUserProps = user => ({
    role: user.role
 });
 
+
+router.route('/signin')
+    .post( async (request, response) => {
+        try {
+            // get user from db by email
+            const user = await User.findOne({email: request.body.email});
+            if ( !user ) {
+                return response.status(400).json({message: 'Wrong email'});
+            }
+
+            // compare password
+            const compare = await user.comparePassord(request.body.password);
+            if ( !compare ) {
+                return response.status(400).json({message: 'Wrong password'});
+            }
+
+            // generate token
+            const token = user.generateToken();
+            // set cookie with token
+            response.cookie('x-access-token', token)
+                .status(200).send( getUserProps(user) );
+
+        } catch (error) {
+            response.status(400).json({message: 'Sign In error', error});
+        }
+    });
+
+
 module.exports = router;

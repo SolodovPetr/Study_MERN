@@ -60,6 +60,12 @@ userSchem.pre('save', async function (next) {
     next();
 });
 
+userSchem.methods.comparePassord = async function (candidatePassword) {
+    const user = this;
+    const match = await bcrypt.compare(candidatePassword, user.password);
+    return match;
+}
+
 // generate token
 userSchem.methods.generateToken = function () {
     const user = this;
