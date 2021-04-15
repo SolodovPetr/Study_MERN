@@ -3,7 +3,9 @@ const router = express.Router();
 require('dotenv').config();
 
 const { User } = require('../../models/user_model');
+const { checkUserExists } = require('../../middleware/auth');
 
+// Register
 router.route('/register')
     .post( async (request, response ) => {
         try {
@@ -33,13 +35,17 @@ router.route('/register')
         }
     });
 
+/**
+ * @param user object
+ * @returns {{_id, email, role}}
+ */
 const getUserProps = user => ({
    _id: user._id,
    email: user.email,
    role: user.role
 });
 
-
+// Sign In
 router.route('/signin')
     .post( async (request, response) => {
         try {
@@ -66,5 +72,10 @@ router.route('/signin')
         }
     });
 
+// Profile
+router.route('/profile')
+    .get( checkUserExists, async (request, response) => {
+        response.status(200).send('Profile');
+    });
 
 module.exports = router;
