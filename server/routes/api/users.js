@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const { User } = require('../../models/user_model');
 const { checkUserExists } = require('../../middleware/auth');
+const { grantAccess}  = require('../../middleware/roles');
 
 // Register
 router.route('/register')
@@ -74,7 +75,7 @@ router.route('/signin')
 
 // Profile
 router.route('/profile')
-    .get( checkUserExists, async (request, response) => {
+    .get( checkUserExists, grantAccess('action', 'resource'), async (request, response) => {
         response.status(200).send('Profile');
     });
 
