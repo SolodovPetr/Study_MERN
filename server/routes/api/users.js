@@ -43,7 +43,10 @@ router.route('/register')
 const getUserProps = user => ({
    _id: user._id,
    email: user.email,
-   role: user.role
+   role: user.role,
+   firstname: user.firstname,
+   lastname: user.lastname,
+   age: user.age
 });
 
 // Sign In
@@ -75,8 +78,12 @@ router.route('/signin')
 
 // Profile
 router.route('/profile')
-    .get( checkUserExists, grantAccess('action', 'resource'), async (request, response) => {
-        response.status(200).send('Profile');
+    .get( checkUserExists, grantAccess('readOwn', 'profile'), async (request, response) => {
+        // get permission from locals
+        const { permission } = response.locals;
+        // filter data with permission
+        response.status(200).json(permission.filter(request.user._doc));
     });
+
 
 module.exports = router;
