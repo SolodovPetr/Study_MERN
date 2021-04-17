@@ -78,12 +78,14 @@ router.route('/signin')
 
 // Profile
 router.route('/profile')
+    // Read
     .get( checkUserExists, grantAccess('readOwn', 'profile'), async (request, response) => {
         // get permission from locals
         const { permission } = response.locals;
         // filter data with permission
         response.status(200).json(permission.filter(request.user._doc));
     })
+    // Update
     .patch( checkUserExists, grantAccess('updateOwn', 'profile'), async (request, response) => {
         try {
             const user = await User.findOneAndUpdate(
@@ -101,14 +103,43 @@ router.route('/profile')
             if ( !user ) {
                 response.status(400).json({message: 'User not found for update', error});
             }
-
-            console.log( 'ID:', request.user._id )
-            console.log(getUserProps(user))
-
             response.status(200).json(getUserProps(user));
         } catch (error) {
             response.status(400).json({message: 'Update error', error});
         }
+    });
+
+// Update email
+router.route('/update_email')
+    .patch( checkUserExists, grantAccess('updateOwn', 'profile'), async (request, response) => {
+        try {
+            if ( await User.emailExist(request.body.newemail) ) {
+                response.status(400).json({message: 'This email already taken'});
+            }
+
+            const user = await User.findOneAndUpdate(
+                { _id: request.user._id },
+                {
+                    "$set": {
+                        email: request.body.newemail
+                    }
+                },
+                { new: true }
+            );
+
+            if ( !user ) {
+                response.status(400).json({message: 'User not found for update', error});
+            }
+
+            // generate token with new email
+            const token = user.generateToken();
+            response.cookie('x-access-token', token)
+                .status(200).send({ email: user.email });
+
+        } catch (error) {
+            response.status(400).json({message: 'Email update error', error});
+        }
+
     });
 
 // Is user Authenticated
