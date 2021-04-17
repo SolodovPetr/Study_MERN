@@ -83,7 +83,38 @@ router.route('/profile')
         const { permission } = response.locals;
         // filter data with permission
         response.status(200).json(permission.filter(request.user._doc));
+    })
+    .patch( checkUserExists, grantAccess('updateOwn', 'profile'), async (request, response) => {
+        try {
+            const user = await User.findOneAndUpdate(
+                { _id: request.user._id },
+                {
+                    "$set": {
+                        firstname: request.body.firstname,
+                        lastname: request.body.lastname,
+                        age: request.body.age
+                    }
+                },
+                { new: true }
+            );
+
+            if ( !user ) {
+                response.status(400).json({message: 'User not found for update', error});
+            }
+
+            console.log( 'ID:', request.user._id )
+            console.log(getUserProps(user))
+
+            response.status(200).json(getUserProps(user));
+        } catch (error) {
+            response.status(400).json({message: 'Update error', error});
+        }
     });
 
+// Is user Authenticated
+router.route('/isauth')
+    .get(checkUserExists, (request, response) => {
+        response.status(200).send(getUserProps(request.user))
+    });
 
 module.exports = router;
