@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
+// Model
 const { User } = require('../../models/user_model');
+// Middleware
 const { checkUserExists } = require('../../middleware/auth');
 const { grantAccess}  = require('../../middleware/roles');
 
