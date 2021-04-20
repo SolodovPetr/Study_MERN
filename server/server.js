@@ -20,7 +20,7 @@ mongoose.connect(mongoUri, {
 app.use(bodyParser.json());
 app.use(checkToken);
 app.use('/api/users', usersRouter);
-app.use('/api/artiles', articlesRouter);
+app.use('/api/articles', articlesRouter);
 
 
 const port = process.env.PORT || 3001;
